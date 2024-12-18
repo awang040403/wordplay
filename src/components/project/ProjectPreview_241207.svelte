@@ -1,7 +1,7 @@
 <script lang="ts">
     import type Project from '@models/Project';
     import Evaluator from '@runtime/Evaluator';
-    import { DB, locales} from '../../db/Database';
+    import { DB, locales, Creators } from '../../db/Database';
     import { isAudience, isFlagged } from '../../models/Moderation';
     import { getUser } from '../project/Contexts';
     import Link from './Link.svelte';
@@ -13,6 +13,7 @@
     import { getFaceCSS } from '@output/outputToCSS';
     import UnicodeString from '@models/UnicodeString';
     import ExceptionValue from '@values/ExceptionValue';
+    import CreatorView from './CreatorView.svelte';
 
     export let project: Project;
     export let action: (() => void) | undefined = undefined;
@@ -74,6 +75,10 @@
 
     /** See if this is a public project being viewed by someone who isn't a creator or collaborator */
     $: audience = isAudience($user, project);
+
+    // Get owner and collaborators
+    $: owner = project.getOwner();
+    //$: collaborators = project.getCollaborators();
 </script>
 
 <div class="project" class:named={name}>
@@ -104,15 +109,36 @@
         </div>
     </a>
     {#if name}
-        <div class="name"
-            >{#if action}{project.getName()}{:else}<Link to={path}
+        <div class="name">
+            {#if action}{project.getName()}{:else}<Link to={path}
                     >{#if project.getName().length === 0}<em class="untitled"
                             >&mdash;</em
                         >{:else}
                         {project.getName()}{/if}</Link
                 >{#if $navigating && `${$navigating.to?.url.pathname}${$navigating.to?.url.search}` === path}
-                    <Spinning />{:else}<slot />{/if}{/if}</div
-        >{/if}
+                    <Spinning />{:else}<slot />{/if}{/if}
+            {#if owner}<p>Owner: {owner}</p>
+                {#await Creators.getCreator(owner)}
+                    <Spinning label="" />
+                {:then creator}
+                    <div class="creator-info">
+                        <CreatorView {creator} />
+                        <!--{#if collaborators.length > 0}
+                            <div class="collaborators">
+                                {#each collaborators as collaborator}
+                                    {#await Creators.getCreator(collaborator)}
+                                        <Spinning label="" />
+                                    {:then collaboratorCreator}
+                                        <CreatorView creator={collaboratorCreator} />
+                                    {/await}
+                                {/each}
+                            </div>
+                        {/if}-->
+                    </div>
+                {/await}
+            {/if}
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -179,5 +205,18 @@
 
     .blurred {
         filter: blur(10px);
+    }
+
+    .creator-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--wordplay-spacing);
+        margin-top: var(--wordplay-spacing);
+    }
+
+    .collaborators {
+        display: flex;
+        flex-direction: column;
+        gap: calc(var(--wordplay-spacing) / 2);
     }
 </style>
