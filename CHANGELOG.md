@@ -3,6 +3,27 @@
 We'll note all notable changes in this file, including bug fixes, enhancements, and all closed issues.
 Dates are in `YYYY-MM-DD` format and versions are in [semantic versioning](http://semver.org/) format.
 
+## 0.14.1 2024-01-11
+
+### Added
+
+- Click outside dialog to dismiss it.
+- Fixed #603 Machine translation of tutorials.
+- Include all draft locales, but mark as draft.
+- Translate to any Google Translate supported language.
+
+### Fixed
+
+- Tutorial typos
+- More precise empty input lists in locale schema.
+- Fixed node concept links.
+
+### Maintenence
+
+- Cleaned up the supported locales code.
+- Clarified language chooser functionality.
+- Removed example localization check.
+
 ## 0.14.0 2024-12-27
 
 ### Added
